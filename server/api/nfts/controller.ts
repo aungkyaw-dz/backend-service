@@ -63,6 +63,7 @@ class Controller {
         res: Response
       ): Promise<Interfaces.PromiseResponse> => {
         try {
+            console.log(req)
             const resData = await NftHelper.list()
             return SetResponse.success(res, RESPONSES.SUCCESS, {
                 error: false,
@@ -117,7 +118,7 @@ class Controller {
         res: Response
       ): Promise<Interfaces.PromiseResponse> => {
         try {
-            
+            console.log(req)
             return SetResponse.success(res, RESPONSES.SUCCESS, {
                 error: false,
               });

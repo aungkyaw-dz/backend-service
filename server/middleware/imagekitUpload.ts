@@ -17,5 +17,6 @@ export const UploadImage =async (file:any) =>{
     return  imageUrl.thumbnailUrl
   }catch (err){
     console.log(err)
+    return(err)
   }
 }

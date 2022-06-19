@@ -3,7 +3,6 @@ import  CONFIG  from './config/env'
 import dbConnection from './config/db_connection'
 import routers from './routers'
 import cors from 'cors';
-import multer from 'multer';
 import fileUpload from 'express-fileupload';
 var path = require('path');
 var cookieParser = require('cookie-parser');
