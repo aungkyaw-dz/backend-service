@@ -7,6 +7,8 @@
     "build": "npx tsc",
     "compile": "ts-node build.ts && tsc",
     "start": "ts-node server/index.ts",
+    "vercel": "vercel dev",
+    "deploy": "vercel deploy --prod",
     "dev": "nodemon --exec npx ts-node server/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -32,7 +34,8 @@
     "mysql2": "^2.3.3",
     "sequelize": "^6.20.1",
     "shelljs": "^0.8.5",
-    "ts-node": "^10.8.0"
+    "ts-node": "^10.8.0",
+    "vercel": "^25.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",
