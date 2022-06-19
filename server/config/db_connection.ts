@@ -40,6 +40,10 @@ const sequelize = new Sequelize(
 // Sync all models on application startup, during `development` environment
 const runDB = () => {
   try {
+
+    sequelize.authenticate().then(()=>{
+      console.log("connected")
+    });
     if (CONFIG.NODE_ENV === 'development') {
       sequelize
         .sync({ alter: true })
@@ -47,10 +51,10 @@ const runDB = () => {
           console.log('All Models synced succesfully:');
         })
         .catch((error) => {
+          console.log(error)
           throw error;
         });
     }
-    sequelize.authenticate();
   } catch (error) {
     console.log('Error syncing db models: ', error);
   }

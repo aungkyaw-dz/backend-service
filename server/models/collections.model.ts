@@ -12,7 +12,7 @@ const CollectionsModel = sequelize.define(
       autoIncrement: true,
     },
     name: {
-      type: DataTypes.STRING(200),
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
     description: {

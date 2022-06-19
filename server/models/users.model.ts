@@ -6,19 +6,18 @@ const UsersModel = sequelize.define(
   'users',
   {
     userId: {
-      type: DataTypes.STRING(300),
+      type: DataTypes.STRING(50),
       allowNull: false,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
     walletAddress: {
-        type: DataTypes.STRING(300),
+        type: DataTypes.STRING(50),
         allowNull: false,
-        primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
       },
     email: {
-      type: DataTypes.STRING(300),
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     username: {
