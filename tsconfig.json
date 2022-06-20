@@ -22,7 +22,7 @@
     "outDir": "dist",
     "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["server/**/*.ts"],
+  "include": ["server/**/*.ts", "index.d.ts"],
   "exclude": ["node_modules"]
 }
 
