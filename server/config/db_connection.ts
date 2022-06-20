@@ -8,6 +8,7 @@ const sequelize = new Sequelize(
   {
     host: CONFIG.MYSQLDB.HOST,
     dialect: 'mysql',
+    dialectModule: require('mysql2'),
     logging: CONFIG.NODE_ENV === 'development' ? true : false,
     retry: {
       match: [
