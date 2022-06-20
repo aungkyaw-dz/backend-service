@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npx tsc",
+    "build":  "ts-node build.ts && tsc",
     "compile": "ts-node build.ts && tsc",
     "start": "ts-node server/index.ts",
     "vercel": "vercel dev",
