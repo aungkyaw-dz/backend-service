@@ -11,9 +11,9 @@ export default {
       PASSWORD: process.env.DB_PASSWORD || 'admin123',
     },
     IMAGEKIT: {
-      PUBLIC: process.env.IMAGEKIT_PUBLIC ,
-      PRIVATE: process.env.IMAGEKIT_PRIVATE ,
-      ENDPOINT: process.env.IMAGEKIT_ENDPOINT ,
+      PUBLIC: process.env.IMAGEKIT_PUBLIC ||"public_Gy4558uOUfOf6C5emV6g81ahTOs=",
+      PRIVATE: process.env.IMAGEKIT_PRIVATE || "private_pvoj09efencC74qpgXqHEQHWjwU=" ,
+      ENDPOINT: process.env.IMAGEKIT_ENDPOINT || "https://ik.imagekit.io/kkventure" ,
     },
     JWT: {
       ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,
