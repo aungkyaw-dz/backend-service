@@ -19,7 +19,7 @@
     "sourceMap": true,
     "strictPropertyInitialization": false,
     "resolveJsonModule": true,
-    "outDir": "dist",
+    "outDir": "public",
     "typeRoots": ["./node_modules/@types"],
     "types": [
       "node"
