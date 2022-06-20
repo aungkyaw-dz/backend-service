@@ -2,7 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import  CONFIG  from './config/env'
 import dbConnection from './config/db_connection'
 import routers from './routers'
-const cors = require('cors');
+import cors from 'cors';
 import fileUpload from 'express-fileupload';
 var path = require('path');
 var cookieParser = require('cookie-parser');
