@@ -19,12 +19,10 @@
     "sourceMap": true,
     "strictPropertyInitialization": false,
     "resolveJsonModule": true,
-    "outDir": "public",
-    "typeRoots": ["./node_modules/@types"],
-    "types": [
-      "node"
-    ]
+    "outDir": "dist",
+    "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["server/**/*.ts"]
+  "include": ["server/**/*.ts"],
+  "exclude": ["node_modules"]
 }
 
