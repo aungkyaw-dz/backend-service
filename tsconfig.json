@@ -20,7 +20,10 @@
     "strictPropertyInitialization": false,
     "resolveJsonModule": true,
     "outDir": "dist",
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "types": [
+      "node"
+    ]
   },
   "include": ["server/**/*.ts"],
   "exclude": ["node_modules"]
