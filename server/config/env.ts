@@ -2,10 +2,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export default {
-    RUNNING_PORT: parseInt(process.env.PORT || 'us-cdbr-east-05.cleardb.net'),
+    RUNNING_PORT: parseInt(process.env.PORT || '3001'),
     NODE_ENV: process.env.NODE_ENV,
     MYSQLDB: {
-      HOST: process.env.DB_HOST || 'localhost',
+      HOST: process.env.DB_HOST || 'us-cdbr-east-05.cleardb.net',
       DATABASE_NAME: process.env.DB_NAME || 'heroku_12826af6ab28a33',
       USERNAME: process.env.DB_USERNAME || 'b5117301bb5162',
       PASSWORD: process.env.DB_PASSWORD || 'ee5cbe3f',
