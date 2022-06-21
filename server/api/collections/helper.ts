@@ -35,7 +35,7 @@ class CollectionHelper{
       }
     }
 
-  public async list({name}:{name: any}) {
+  public async list({name, offset, limit}:{name: any, offset: any, limit: any}) {
         try {
             const res = await CollectionModel.findAll({
               where:{
@@ -43,7 +43,9 @@ class CollectionHelper{
                   [Op.like]:[`%${name}%`]
                 }
               },
-              include: ['nfts', 'Creator']
+              include: ['nfts', 'Creator'],
+              offset: offset,
+              limit: limit
             })
             return res
         } catch (err: any) {
@@ -84,11 +86,17 @@ class CollectionHelper{
       }
   }
 
-  public async getCollectionByFeatured() {
+  public async getCollectionByFeatured({name,offset, limit}:{name:any, offset: any, limit: any}) {
     try {
-        const res = await CollectionModel.findOne({
-            where: {featured: 1},
-            include: ['nfts', 'Creator']
+        const res = await CollectionModel.findAll({
+          where: {
+            name: {
+              [Op.like]:[`%${name}%`]
+            },
+            favourite: 1},
+            include: ['nfts', 'Creator'],
+            offset: offset,
+            limit: limit,
         })
         return res
     } catch (err: any) {
@@ -99,11 +107,17 @@ class CollectionHelper{
     }
   }
 
-  public async getCollectionByFavourite() {
+  public async getCollectionByFavourite({name,offset, limit}:{name:any, offset: any, limit: any}) {
     try {
-        const res = await CollectionModel.findOne({
-            where: {favourite: 1},
-            include: ['nfts', 'Creator']
+        const res = await CollectionModel.findAll({
+            where: {
+              name: {
+                [Op.like]:[`%${name}%`]
+              },
+              favourite: 1},
+            include: ['nfts', 'Creator'],
+            offset: offset,
+            limit: limit,
         })
         return res
     } catch (err: any) {

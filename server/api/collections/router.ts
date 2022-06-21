@@ -6,7 +6,7 @@ export default express
     .post('/create', controller.create)
     .post('/update/:collectionName', controller.update)
     .get('/list', controller.list)
-    .get('/:collectionName', controller.getByName)
     .get('/featured', controller.getByFeatured)
     .get('/favourite', controller.getByFavourite)
     .get('/my-collections/:walletAddress', controller.getByUser)
+    .get('/:collectionName', controller.getByName)

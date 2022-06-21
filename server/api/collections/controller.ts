@@ -63,8 +63,9 @@ class Controller {
       ): Promise<Interfaces.PromiseResponse> => {
         try {
             const name = req.query.name ||''
-            console.log(req.query)
-            const resData = await CollectionHelper.list({name: name})
+            const offset = req.query.offset ||0
+            const limit = req.query.limit ||10
+            const resData = await CollectionHelper.list({name: name, offset: offset, limit: limit})
             return SetResponse.success(res, RESPONSES.SUCCESS, {
                 error: false,
                 data: resData
@@ -115,13 +116,14 @@ class Controller {
         res: Response
       ): Promise<Interfaces.PromiseResponse> => {
         try {
-            console.log(req)
-
-            const resData = await CollectionHelper.getCollectionByFeatured()
-            return SetResponse.success(res, RESPONSES.SUCCESS, {
-                error: false,
-                data: resData
-              });
+          const name = req.query.name ||''
+          const offset = req.query.offset ||0
+          const limit = req.query.limit ||10
+          const resData = await CollectionHelper.getCollectionByFeatured({name: name, offset: offset, limit: limit})
+          return SetResponse.success(res, RESPONSES.SUCCESS, {
+              error: false,
+              data: resData
+            });
         } catch (error: any) {
             return SetResponse.success(res, RESPONSES.BADREQUEST, {
                 error: true,
@@ -134,9 +136,10 @@ class Controller {
         res: Response
       ): Promise<Interfaces.PromiseResponse> => {
         try {
-            console.log(req)
-
-            const resData = await CollectionHelper.getCollectionByFeatured()
+            const name = req.query.name ||''
+            const offset = req.query.offset ||0
+            const limit = req.query.limit ||10
+            const resData = await CollectionHelper.getCollectionByFeatured({name: name, offset: offset, limit: limit})
             return SetResponse.success(res, RESPONSES.SUCCESS, {
                 error: false,
                 data: resData

@@ -13,7 +13,6 @@ class Controller {
     ): Promise<Interfaces.PromiseResponse> => {
       try {
         const data = req.body
-        let collectionData :any = await CollectionHelper.getCollectionByName({name: data.collectionName})
         const user:any = await UserHelper.getOrCreate({walletAddress: data.creator})
         data.creator = user.userId
         data.owner = user.userId
@@ -21,10 +20,10 @@ class Controller {
         const logo: any = files?.logo
         const logoUrl = await UploadImage(logo)
         data.logo = logoUrl
-        if(!collectionData){
-          collectionData = await CollectionHelper.create({name: data.collectionName, description: data.collectionDesc, creator: data.creator  })
+        if(data.collectionId == "create"){
+          const collectionData:any = await CollectionHelper.create({name: data.collectionName, description: data.collectionDesc, creator: data.creator  })
+          data.collectionId = collectionData?.collectionId
         }
-        data.collectionId = collectionData?.collectionId
         const resData = await NftHelper.create(data)
         return SetResponse.success(res, RESPONSES.CREATED, {
             error: false,
