@@ -16,13 +16,12 @@ class NftHelper{
 
   public async update(data: any, {nftId}: {nftId: string}) {
       try {
-        console.log(data, "here")
+        console.log(nftId, ">>>>")
+        console.log(data.tokenId)
         const res = await NFTsModel.update(data, {
             where: {nftId: nftId},
         })
-        console.log(res, "here")
         if(res){
-
           const updatedData = await NFTsModel.findOne({
             where: {nftId},
             include:['Owner', 'Creator']
@@ -40,15 +39,22 @@ class NftHelper{
       }
     }
 
-  public async list() {
+  public async list({sortBy,offset, limit}:{sortBy:any, offset: any, limit: any}) {
         try {
-            const res = await NFTsModel.findAll()
-            return res
+          const key = sortBy ? sortBy : "createdAt"
+          const res = await NFTsModel.findAll({
+            offset: offset,
+            limit: limit,
+            order: [
+              [key, "DESC"] 
+            ]
+          })
+          return res
         } catch (err: any) {
-            return {
-                error: true,
-                message: err.message,
-            };
+          return {
+              error: true,
+              message: err.message,
+          };
         }
     }
   public async getNftById({nftId}: {nftId: string}) {
@@ -87,10 +93,13 @@ class NftHelper{
       }
   }
 
-  public async getNftByUser({userWallet}: {userWallet: string}) {
+  public async getNftByUser({userId}: {userId: string}) {
         try {
+
             const res = await NFTsModel.findAll({
-                where: {owner: userWallet}
+                where: {owner: userId},
+                include:['Owner', 'Creator', 'Collection']
+
             })
             return res
         } catch (err: any) {

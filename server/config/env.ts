@@ -20,6 +20,10 @@ export default {
       ISSUER: process.env.JWT_ISSUER,
       REFRESH_TOKEN: process.env.JWT_REFRESH_SECRET,
       EXPIRES_IN: process.env.JWT_EXPIRES_IN
+    },
+    PINATA: {
+      KEY: process.env.PINATA_KEY || "",
+      SECRET: process.env.PINATA_SECRET|| "",
     }
   };
   

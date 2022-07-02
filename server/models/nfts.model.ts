@@ -14,7 +14,7 @@ const NftModel = sequelize.define(
     },
     collectionId: { type: DataTypes.INTEGER(), allowNull: false },
     nftAddress: { type: DataTypes.STRING(50), allowNull: true },
-    title: { type: DataTypes.STRING(50), allowNull: true },
+    name: { type: DataTypes.STRING(50), allowNull: true },
     fileType: { type: DataTypes.STRING(10), defaultValue: 'image' },
     description: { type: DataTypes.TEXT(), defaultValue: '' },
     tokenUri: { type: DataTypes.STRING(), allowNull: true },
@@ -31,7 +31,7 @@ const NftModel = sequelize.define(
     },
     status: {
       type: DataTypes.ENUM(),
-      values: ['PENDING', 'MINTED', 'FAILED'],
+      values: ['PENDING','UPDATING', 'READY', 'MINTED', 'FAILED'],
       defaultValue: 'PENDING',
     },
     tokenId: { type: DataTypes.INTEGER(), defaultValue: 0 },
@@ -56,7 +56,10 @@ const NftModel = sequelize.define(
   }
 );
 
-NftModel.belongsTo(CollectionsModel)
+NftModel.belongsTo(CollectionsModel,{
+  as: 'Collection',
+  foreignKey: 'collectionId'
+})
 CollectionsModel.hasMany(NftModel, {
   as: 'nfts',
   foreignKey: 'collectionId'

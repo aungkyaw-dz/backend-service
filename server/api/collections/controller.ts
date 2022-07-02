@@ -32,7 +32,7 @@ class Controller {
       res: Response
     ): Promise<Interfaces.PromiseResponse> => {
       try {
-          const name = req.params.collectionName
+          const collectionId = req.params.collectionId
           const data = req.body
           const files:any = req.files
           const logo: any = files?.logo
@@ -45,7 +45,7 @@ class Controller {
             const bannerUrl = await UploadImage(banner)
             data.banner = bannerUrl
           }
-          const resData = await CollectionHelper.update(data, {name})
+          const resData = await CollectionHelper.update(data, {collectionId})
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data : resData
@@ -93,13 +93,13 @@ class Controller {
         }
       };
 
-  getByName = async (
+  getById = async (
         req: Request,
         res: Response
       ): Promise<Interfaces.PromiseResponse> => {
         try {
-            const name = req.params.collectionName
-            const resData = await CollectionHelper.getCollectionByName({name})
+            const collectionId = req.params.collectionId
+            const resData = await CollectionHelper.getCollectionById({collectionId})
             return SetResponse.success(res, RESPONSES.SUCCESS, {
                 error: false,
                 data: resData
@@ -157,8 +157,8 @@ class Controller {
       ): Promise<Interfaces.PromiseResponse> => {
         try {
           const data = req.body
-          const name = req.params.collectionName
-          const resNft = await CollectionHelper.update(data, {name})
+          const collectionId = req.params.collectionId
+          const resNft = await CollectionHelper.update(data, {collectionId})
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data: resNft

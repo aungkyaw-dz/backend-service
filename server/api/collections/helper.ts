@@ -14,14 +14,14 @@ class CollectionHelper{
     }
   }
 
-  public async update(data: any, {name}: {name: string}) {
+  public async update(data: any, {collectionId}: {collectionId: string}) {
       try {
         const res = await CollectionModel.update(data, {
-            where: {name: name},
+            where: {collectionId: collectionId},
         })
         if(res){
           const collection = await CollectionModel.findOne({
-            where: {name: name}
+            where: {collectionId: collectionId}
           })
           return collection
         }
@@ -71,10 +71,10 @@ class CollectionHelper{
         }
     }
   
-  public async getCollectionByName({name}: {name: string}) {
+  public async getCollectionById({collectionId}: {collectionId: string}) {
       try {
           const res = await CollectionModel.findOne({
-              where: {name: name},
+              where: {collectionId: collectionId},
               include: ['nfts', 'Creator']
           })
           return res
