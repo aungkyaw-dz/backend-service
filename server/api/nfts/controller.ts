@@ -215,11 +215,9 @@ class Controller {
       ): Promise<Interfaces.PromiseResponse> => {
         try {
           const userWallet = req.params.userWallet
-          const a = req.query
-          console.log(a)
+          const query = req.query
           const user:any = await UserHelper.getByWallet({walletAddress:userWallet})
-          const nftRes = await NftHelper.getNftByUser({userId: user.userId})
-          console.log(nftRes)
+          const nftRes = await NftHelper.getNftByUser({userId: user.userId, query: query })
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data: nftRes

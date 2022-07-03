@@ -93,14 +93,16 @@ class NftHelper{
       }
   }
 
-  public async getNftByUser({userId}: {userId: string}) {
+  public async getNftByUser({userId, query}: {userId: string, query: any}) {
         try {
-
+            query.owner= userId
+            console.log(query)
             const res = await NFTsModel.findAll({
-                where: {owner: userId},
+                where: [query],
                 include:['Owner', 'Creator', 'Collection']
 
             })
+            console.log(res)
             return res
         } catch (err: any) {
             return {
