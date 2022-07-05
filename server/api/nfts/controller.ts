@@ -22,6 +22,7 @@ class Controller {
         const logo: any = files?.logo
         const logoUrl = await UploadImage(logo)
         data.logo = logoUrl
+        data.status= "READY"
         if(data.collectionId == "create"){
           const collectionData:any = await CollectionHelper.create({name: data.collectionName, description: data.collectionDesc, creator: data.creator  })
           data.collectionId = collectionData?.collectionId
@@ -160,7 +161,11 @@ class Controller {
           const sortBy = req.query.sortBy ||''
           const offset = req.query.offset ||0
           const limit = req.query.limit ||10
-          const resData = await NftHelper.list({sortBy: sortBy, offset: offset, limit: limit})
+          const query = req.query
+          delete query.sortBy;
+          delete query.offset;
+          delete query.limit;
+          const resData = await NftHelper.list({sortBy: sortBy, query: query, offset: offset, limit: limit})
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data: resData

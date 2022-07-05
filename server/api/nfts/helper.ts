@@ -39,12 +39,14 @@ class NftHelper{
       }
     }
 
-  public async list({sortBy,offset, limit}:{sortBy:any, offset: any, limit: any}) {
+  public async list({sortBy ,query,offset, limit}:{sortBy:any, query: any,offset: any, limit: any}) {
         try {
           const key = sortBy ? sortBy : "createdAt"
           const res = await NFTsModel.findAll({
+            where: [query],
             offset: offset,
             limit: limit,
+            include:['Owner', 'Creator'],
             order: [
               [key, "DESC"] 
             ]

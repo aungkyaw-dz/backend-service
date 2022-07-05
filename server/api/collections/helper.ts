@@ -1,4 +1,5 @@
 import CollectionModel from '../../models/collections.model';
+import NftModel from '../../models/nfts.model';
 const { Op } = require("sequelize");
 class CollectionHelper{
 
@@ -43,7 +44,7 @@ class CollectionHelper{
                   [Op.like]:[`%${name}%`]
                 }
               },
-              include: ['nfts', 'Creator'],
+              include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"}, required: false}, 'Creator'],
               offset: offset,
               limit: limit
             })
@@ -75,7 +76,7 @@ class CollectionHelper{
       try {
           const res = await CollectionModel.findOne({
               where: {collectionId: collectionId},
-              include: ['nfts', 'Creator']
+              include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator'],
           })
           return res
       } catch (err: any) {
@@ -93,8 +94,8 @@ class CollectionHelper{
             name: {
               [Op.like]:[`%${name}%`]
             },
-            favourite: 1},
-            include: ['nfts', 'Creator'],
+            featured: 1},
+            include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator'],
             offset: offset,
             limit: limit,
         })
@@ -115,7 +116,7 @@ class CollectionHelper{
                 [Op.like]:[`%${name}%`]
               },
               favourite: 1},
-            include: ['nfts', 'Creator'],
+              include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator'],
             offset: offset,
             limit: limit,
         })

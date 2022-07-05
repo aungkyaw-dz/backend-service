@@ -63,8 +63,10 @@ class Controller {
       ): Promise<Interfaces.PromiseResponse> => {
         try {
             const name = req.query.name ||''
-            const offset = req.query.offset ||0
-            const limit = req.query.limit ||10
+            const offset = Number(req.query.offset) ||0
+            const limit = Number(req.query.limit) ||10
+            console.log(req.query)
+            console.log(limit)
             const resData = await CollectionHelper.list({name: name, offset: offset, limit: limit})
             return SetResponse.success(res, RESPONSES.SUCCESS, {
                 error: false,
@@ -120,6 +122,7 @@ class Controller {
           const offset = req.query.offset ||0
           const limit = req.query.limit ||10
           const resData = await CollectionHelper.getCollectionByFeatured({name: name, offset: offset, limit: limit})
+
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data: resData
@@ -139,7 +142,8 @@ class Controller {
             const name = req.query.name ||''
             const offset = req.query.offset ||0
             const limit = req.query.limit ||10
-            const resData = await CollectionHelper.getCollectionByFeatured({name: name, offset: offset, limit: limit})
+            const resData = await CollectionHelper.getCollectionByFavourite({name: name, offset: offset, limit: limit})
+
             return SetResponse.success(res, RESPONSES.SUCCESS, {
                 error: false,
                 data: resData
@@ -177,9 +181,7 @@ class Controller {
         try {
           const walletAddress = req.params.walletAddress
           const user: any = await UserHelper.getOrCreate({walletAddress: walletAddress})
-          console.log(user)
           const resCollections = await CollectionHelper.getCollectionByUser({userId: user.userId})
-          console.log(user)
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data: resCollections
