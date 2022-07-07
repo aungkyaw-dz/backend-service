@@ -61,7 +61,7 @@ class CollectionHelper{
         try {
             const res = await CollectionModel.findAll({
                 where: {creator: userId},
-                include: ['nfts', 'Creator']
+                include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator'],
             })
             return res
         } catch (err: any) {
@@ -74,10 +74,11 @@ class CollectionHelper{
   
   public async getCollectionById({collectionId}: {collectionId: string}) {
       try {
-          const res = await CollectionModel.findOne({
+          const res:any = await CollectionModel.findOne({
               where: {collectionId: collectionId},
               include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator'],
           })
+          console.log(res?.nfts[0])
           return res
       } catch (err: any) {
           return {

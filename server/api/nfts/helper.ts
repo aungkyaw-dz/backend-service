@@ -114,6 +114,22 @@ class NftHelper{
         }
     }
 
+  public async getAllCategories() {
+    try {
+        const res = await NFTsModel.findAll({
+          attributes: ["categories"],
+          group: 'categories',
+          raw: true
+        })
+        return res
+    } catch (err: any) {
+        return {
+            error: true,
+            message: err.message,
+        };
+    }
+  }
+
 
 }
 

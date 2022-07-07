@@ -8,6 +8,7 @@ export default express
     .post('/update/:nftId', controller.update)
     .post('/bulkUpdate', controller.bulkUpdate)
     .get('/list', controller.list)
+    .get('/getAllCategories',controller.getAllCategories)
     .get('/:nftId', controller.getNftById)
     .get('/get-by-user/:userWallet',controller.getNftByUser)
     .post('/transfer/:nftId', controller.transfer)

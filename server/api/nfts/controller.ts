@@ -47,6 +47,7 @@ class Controller {
       try {
         const data = req.body
         let files:any = req.files?.files
+        // data.categories = JSON.stringify(data.categories)
         fs.mkdirSync(`./uploadimages`)
         if(!files.length){
           files = [files]
@@ -285,6 +286,31 @@ class Controller {
             });
         }
       };
+
+  getAllCategories = async (
+    req: Request,
+    res: Response
+  ): Promise<Interfaces.PromiseResponse> => {
+    try {
+      console.log(req)
+      const categories:any = await NftHelper.getAllCategories()
+      let list:any[] = []
+      categories.map((category)=> {
+        console.log(typeof(category.categories)=='string', "here")
+        list.push(category.categories)
+      })
+      console.log(list)
+      return SetResponse.success(res, RESPONSES.SUCCESS, {
+          error: false,
+          data: categories
+        });
+    } catch (error: any) {
+      return SetResponse.success(res, RESPONSES.BADREQUEST, {
+          error: true,
+          message: error.message
+        });
+    }
+  };
 
 }
 
