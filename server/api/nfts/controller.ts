@@ -55,6 +55,9 @@ class Controller {
         files.map((file:any)=>{
           file.mv(`./uploadimages/${file.name}`)
         })
+        const user:any = await UserHelper.getOrCreate({walletAddress: data.creator})
+        data.creator = user.userId
+        data.owner = user.userId
         if(data.collectionId == "create"){
           const collectionData:any = await CollectionHelper.create({name: data.collectionName, description: data.collectionDesc, creator: data.creator  })
           data.collectionId = collectionData?.collectionId
@@ -63,9 +66,7 @@ class Controller {
           data.collectionName = collectionData.name
         }
         const imageUrl:any = await UploadFSToPinata('uploadimages', data.collectionName)
-        const user:any = await UserHelper.getOrCreate({walletAddress: data.creator})
-        data.creator = user.userId
-        data.owner = user.userId
+        
         fs.mkdirSync(`./${data.collectionName}`)
         let nftList:any[] = []
         files.map(async (file: any, index:any)=> {
@@ -97,10 +98,9 @@ class Controller {
         fs.rmSync(`./${data.collectionName}`, { recursive: true, force: true })
         return SetResponse.success(res, RESPONSES.CREATED, {
             error: false,
-            data: "updateList"
+            data: updateList
           });
       } catch (error: any) {
-          console.log(error.message)
           return SetResponse.success(res, RESPONSES.BADREQUEST, {
               error: true,
               msg: error.message
@@ -135,7 +135,6 @@ class Controller {
     try{
       const data = req.body
       const updateList = data.updateList
-      console.log(updateList)
       let updatedList: any[] = []
       if(updateList.length > 0){
         updateList.map(async (updateData:any)=>{
@@ -224,6 +223,7 @@ class Controller {
           const query = req.query
           const user:any = await UserHelper.getByWallet({walletAddress:userWallet})
           const nftRes = await NftHelper.getNftByUser({userId: user.userId, query: query })
+
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data: nftRes
