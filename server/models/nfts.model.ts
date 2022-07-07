@@ -45,7 +45,7 @@ const NftModel = sequelize.define(
     featured: { type: DataTypes.BOOLEAN, defaultValue: 0 },
     favourite: { type: DataTypes.BOOLEAN, defaultValue: 0 },
     link: { type: DataTypes.STRING(), allowNull: true },
-    categories: { type: DataTypes.JSON(), allowNull: true },
+    // categories: { type: DataTypes.JSON(), allowNull: true },
   },
   {
     tableName: 'nfts',
