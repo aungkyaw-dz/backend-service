@@ -12,6 +12,7 @@ class AdminHelper{
                   {role_type: 2},
             ]}
         })
+        console.log(user)
         if(user){
           return user
         }

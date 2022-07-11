@@ -1,4 +1,5 @@
 import NFTsModel from '../../models/nfts.model';
+const { Op } = require("sequelize");
 
 class NftHelper{
 
@@ -100,7 +101,12 @@ class NftHelper{
             query.owner= userId
             console.log(query)
             const res = await NFTsModel.findAll({
-                where: [query],
+                where: [
+                  query,
+                  {tokenUri: {
+                    [Op.ne]: ""
+                  }}
+                 ],
                 include:['Owner', 'Creator', 'Collection']
 
             })

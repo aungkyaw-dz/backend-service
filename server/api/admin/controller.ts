@@ -31,7 +31,6 @@ class Controller {
       const userId = userInfo.userId;
       const token = await TokenHandler.generateToken(userId.toString());
 
-
       // let data = await redisHelper.getString(
       //   `jwt_token_${userId}`
       // );
