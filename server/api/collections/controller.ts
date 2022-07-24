@@ -181,12 +181,13 @@ class Controller {
         try {
           const walletAddress = req.params.walletAddress
           const user: any = await UserHelper.getOrCreate({walletAddress: walletAddress})
-          const resCollections = await CollectionHelper.getCollectionByUser({userId: user.userId})
+          const resCollections:any = await CollectionHelper.getCollectionByUser({userId: user.userId})
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data: resCollections
             });
         } catch (error: any) {
+          console.log(error)
           return SetResponse.success(res, RESPONSES.BADREQUEST, {
               error: true,
             });
