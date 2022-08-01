@@ -45,6 +45,16 @@ const NftModel = sequelize.define(
     featured: { type: DataTypes.BOOLEAN, defaultValue: 0 },
     favourite: { type: DataTypes.BOOLEAN, defaultValue: 0 },
     link: { type: DataTypes.STRING(), allowNull: true },
+    item: {
+      type: DataTypes.ENUM(),
+      values: ['SINGLE', 'BUNDLE'],
+      defaultValue: 'SINGLE',
+    },
+    chain: {
+      type: DataTypes.ENUM(),
+      values: ['POLYGON'],
+      defaultValue: 'POLYGON',
+    },
     categories: { type: DataTypes.STRING(), 
                   allowNull: true,
                   get() {
