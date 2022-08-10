@@ -76,9 +76,9 @@ class CollectionHelper{
       try {
           const res:any = await CollectionModel.findOne({
               where: {collectionId: collectionId},
-              include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator'],
+              include: [{model: NftModel, as: 'nfts'}, 'Creator'],
           })
-          console.log(res?.nfts[0])
+          console.log(res)
           return res
       } catch (err: any) {
           return {

@@ -5,8 +5,8 @@ class NftHelper{
 
   public async create(data:any) {
     try {
-        const res = await NFTsModel.create(data)
-        return res
+      const res = await NFTsModel.create(data)
+      return res
     } catch (err: any) {
       return {
         error: true,
@@ -17,15 +17,14 @@ class NftHelper{
 
   public async update(data: any, {nftId}: {nftId: string}) {
       try {
-        console.log(nftId, ">>>>")
-        console.log(data.tokenId)
         const res = await NFTsModel.update(data, {
             where: {nftId: nftId},
         })
         if(res){
           const updatedData = await NFTsModel.findOne({
             where: {nftId},
-            include:['Owner', 'Creator']
+            include:['Owner', 'Creator'],
+            raw: true
           })
 
           return updatedData
@@ -45,24 +44,7 @@ class NftHelper{
           const key = sortBy ? sortBy : "createdAt"
           console.log(query)
           const res = await NFTsModel.findAll({
-            where: [
-              {
-                status: {
-                  [Op.like]: `%${query.status||""}%`
-                },
-                item: {
-                  [Op.like]: `%${query.item||""}%`
-                },
-                categories: {
-                  [Op.like]: `%${query.categories||""}%`
-                },
-                chain: {
-                  [Op.like]: `%${query.chain||""}%`
-                },
-                
-
-            } 
-            ],
+            where: [query],
             offset: offset,
             limit: limit,
             include:['Owner', 'Creator'],

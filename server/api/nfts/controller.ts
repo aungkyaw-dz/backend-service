@@ -6,7 +6,8 @@ import SetResponse, { RESPONSES } from '../../config/response'
 import UserHelper from '../users/helper'
 import { UploadImage } from '../../middleware/imagekitUpload';
 import { UploadFSToPinata, UploadFilesToPinata } from '../../middleware/pinataUpload';
-import NodeFormData from 'form-data';
+const { Op } = require("sequelize");
+
 const fs = require('fs')
 class Controller {
   create = async (
@@ -15,22 +16,100 @@ class Controller {
     ): Promise<Interfaces.PromiseResponse> => {
       try {
         const data = req.body
+        let files:any = req.files?.files
+        fs.mkdirSync(`./uploadimages`)
+        if(!files.length){
+          files = [files]
+        }
+        files.map((file:any)=>{
+          file.mv(`./uploadimages/${file.name}`)
+        })
         const user:any = await UserHelper.getOrCreate({walletAddress: data.creator})
         data.creator = user.userId
         data.owner = user.userId
-        const files:any = req.files
-        const logo: any = files?.logo
-        const logoUrl = await UploadImage(logo)
-        data.logo = logoUrl
-        data.status= "READY"
+        let collectionData:any
         if(data.collectionId == "create"){
-          const collectionData:any = await CollectionHelper.create({name: data.collectionName, description: data.collectionDesc, creator: data.creator  })
+          collectionData = await CollectionHelper.create({name: data.collectionName, description: data.collectionDesc, creator: data.creator  })
           data.collectionId = collectionData?.collectionId
+        }else{
+          collectionData = await CollectionHelper.getCollectionById({collectionId: data.collectionId})
+          data.collectionName = collectionData.name
         }
-        const resData = await NftHelper.create(data)
+        const imageUrl:any = await UploadFSToPinata('uploadimages', data.collectionName)
+        
+        fs.mkdirSync(`./${data.collectionName}`)
+        let nftList:any[] = []
+        await Promise.all(files.map(async (file: any,)=> {
+          const fileUrl = await UploadImage(file)
+          data.file = fileUrl
+          data.name = `${data.name}`
+          data.fileType = file.mimetype.split('/')[0]
+          
+          switch(data.fileType){
+            case "image":
+              data.tokenId = 1
+              console.log(data.fileType)
+              break;
+            case "application":
+              data.tokenId = 2
+              console.log(data.fileType)
+              break;
+            case "text":
+              data.tokenId = 3
+              console.log(data.fileType)
+              break;
+
+            case "video":
+              data.tokenId = 4
+              console.log(data.fileType)
+              break;
+
+            default: 
+              data.tokenId = 0
+
+          }
+          console.log(data.fileType)
+          console.log(data.tokenId)
+          const resData:any = await NftHelper.create(data)
+          nftList.push(resData)
+          console.log(imageUrl)
+          const metaData = {
+            "name": data.name,
+            "image":`https://gateway.pinata.cloud/ipfs/${imageUrl.IpfsHash}/${file.name}`,
+            "description": data.description
+          }
+          console.log(metaData)
+
+          fs.writeFileSync(`./${data.collectionName}/${data.fileType}`, JSON.stringify(metaData))
+          return metaData
+        }))
+        const sourcePath = `${data.collectionName}`
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        let uri:any[] = []
+        let tire:any[] = []
+        const tokenUri:any = await UploadFSToPinata(sourcePath, data.collectionName)
+        let mintData:any ={} 
+        const updatedList =await Promise.all( nftList.map(async (nft)=>{
+          const updateData = {
+            tokenUri: `https://gateway.pinata.cloud/ipfs/${tokenUri.IpfsHash}/${nft.fileType}`,
+            status: "READY"
+          }
+          const updatedNft:any = await NftHelper.update(updateData,{nftId: nft.nftId})
+          uri.push(updatedNft.tokenUri) 
+          tire.push(updatedNft.fileType) 
+          mintData[updatedNft.fileType] = {tokenUri: updatedNft.tokenUri, nftId: nft.nftId}
+          return mintData
+        })
+        )
+        
+        fs.rmSync(`./uploadimages`, { recursive: true, force: true })
+        fs.rmSync(`./${data.collectionName}`, { recursive: true, force: true })
         return SetResponse.success(res, RESPONSES.CREATED, {
             error: false,
-            data: resData
+            uris: uri,
+            tire: tire,
+            collection: collectionData,
+            mintData
           });
       } catch (error: any) {
           return SetResponse.success(res, RESPONSES.BADREQUEST, {
@@ -70,6 +149,7 @@ class Controller {
         fs.mkdirSync(`./${data.collectionName}`)
         let nftList:any[] = []
         files.map(async (file: any, index:any)=> {
+          console.log(file, "<<<<<<<<<<<<<<<<<<<<<<")
           const logoUrl = await UploadImage(file)
           data.logo = logoUrl
           data.name = `${data.name}`
@@ -161,10 +241,24 @@ class Controller {
           const sortBy = req.query.sortBy ||''
           const offset = req.query.offset ||0
           const limit = req.query.limit ||10
-          const query = req.query
-          delete query.sortBy;
-          delete query.offset;
-          delete query.limit;
+          let query:any = {}
+          if(req.query.status){
+            query.status = req.query.status
+          }
+          if(req.query.price){
+            query.price = req.query.price
+          }
+          if(req.query.item){
+            query.item = req.query.item
+          }
+          if(req.query.categories){
+            query.categories = {
+              [Op.like]: `%${req.query.categories}%`
+            }
+          }
+          if(req.query.chain){
+            query.chain = req.query.chain
+          }
           const resData = await NftHelper.list({sortBy: sortBy, query: query, offset: offset, limit: limit})
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,

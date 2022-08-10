@@ -15,6 +15,10 @@ const CollectionsModel = sequelize.define(
       type: DataTypes.STRING(50),
       allowNull: false,
     },
+    address: {
+      type: DataTypes.STRING(200),
+      allowNull: true,
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,

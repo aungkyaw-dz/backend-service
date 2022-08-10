@@ -13,7 +13,6 @@ export const UploadFilesToPinata =async (file:any, name:any) =>{
     };
     console.log(file)
     const pinataRes = await pinata.pinFileToIPFS("test", options)
-    console.log(pinataRes)
     return  pinataRes
   }catch (err){
     console.log(err)
@@ -29,9 +28,7 @@ export const UploadFSToPinata =async (file:any, name:any) =>{
            
         },
     };
-    console.log(options)
     const pinataRes = await pinata.pinFromFS(file, options)
-    console.log(pinataRes)
     return  pinataRes
   }catch (err){
     console.log(err)

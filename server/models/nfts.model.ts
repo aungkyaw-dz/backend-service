@@ -15,7 +15,7 @@ const NftModel = sequelize.define(
     collectionId: { type: DataTypes.INTEGER(), allowNull: false },
     nftAddress: { type: DataTypes.STRING(50), allowNull: true },
     name: { type: DataTypes.STRING(50), allowNull: true },
-    fileType: { type: DataTypes.STRING(10), defaultValue: 'image' },
+    fileType: { type: DataTypes.STRING(50), defaultValue: 'image' },
     description: { type: DataTypes.TEXT(), defaultValue: '' },
     tokenUri: { type: DataTypes.STRING(), allowNull: true },
     nftType: {
@@ -39,7 +39,7 @@ const NftModel = sequelize.define(
     creator: { type: DataTypes.STRING(200), allowNull: true },
     txid: { type: DataTypes.STRING(), allowNull: true },
     viewed: { type: DataTypes.INTEGER(), defaultValue: 0 },
-    logo: { type: DataTypes.STRING(), allowNull: true },
+    file: { type: DataTypes.STRING(), allowNull: true },
     banner: { type: DataTypes.STRING(), allowNull: true },
     active: { type: DataTypes.BOOLEAN, defaultValue: 1 },
     featured: { type: DataTypes.BOOLEAN, defaultValue: 0 },
@@ -61,7 +61,11 @@ const NftModel = sequelize.define(
                     return this.getDataValue('categories')?.split(';')
                   },
                   set(val:any) {
-                    this.setDataValue('categories',val.join(';'));
+                    if(val.length>1){
+                      return this.setDataValue('categories',val.join(';'));
+                    }else{
+                      return this.setDataValue('categoreis', val)
+                    }
                   },
                  },
   },
