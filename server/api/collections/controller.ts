@@ -4,6 +4,8 @@ import CollectionHelper from './helper';
 import SetResponse, { RESPONSES } from '../../config/response'
 import { UploadImage } from '../../middleware/imagekitUpload';
 import UserHelper from '../users/helper'
+const { Op } = require("sequelize");
+
 class Controller {
   create = async (
       req: Request,
@@ -20,7 +22,7 @@ class Controller {
             data: resData
           });
       } catch (error: any) {
-          return SetResponse.success(res, RESPONSES.BADREQUEST, {
+          return SetResponse.error(res, RESPONSES.BADREQUEST, {
               error: true,
               msg: error.message
             });
@@ -51,7 +53,7 @@ class Controller {
               data : resData
             });
       } catch (error: any) {
-          return SetResponse.success(res, RESPONSES.BADREQUEST, {
+          return SetResponse.error(res, RESPONSES.BADREQUEST, {
               error: true,
             });
       }
@@ -62,18 +64,34 @@ class Controller {
         res: Response
       ): Promise<Interfaces.PromiseResponse> => {
         try {
-            const name = req.query.name ||''
-            const offset = Number(req.query.offset) ||0
-            const limit = Number(req.query.limit) ||10
-            console.log(req.query)
-            console.log(limit)
-            const resData = await CollectionHelper.list({name: name, offset: offset, limit: limit})
+            const sortBy = req.query.sortBy ||''
+            const offset = req.query.offset ||0
+            const limit = req.query.limit ||10
+            let query:any = {}
+            if(req.query.status){
+              query.status = req.query.status
+            }
+            if(req.query.price){
+              query.price = req.query.price
+            }
+            if(req.query.item){
+              query.item = req.query.item
+            }
+            if(req.query.categories){
+              query.categories = {
+                [Op.like]: `%${req.query.categories}%`
+              }
+            }
+            if(req.query.chain){
+              query.chain = req.query.chain
+            }
+            const resData = await CollectionHelper.list({sortBy: sortBy, query: query, offset: offset, limit: limit})
             return SetResponse.success(res, RESPONSES.SUCCESS, {
                 error: false,
                 data: resData
               });
         } catch (error: any) {
-            return SetResponse.success(res, RESPONSES.BADREQUEST, {
+            return SetResponse.error(res, RESPONSES.BADREQUEST, {
                 error: true,
               });
         }
@@ -89,7 +107,7 @@ class Controller {
                 error: false,
               });
         } catch (error: any) {
-            return SetResponse.success(res, RESPONSES.BADREQUEST, {
+            return SetResponse.error(res, RESPONSES.BADREQUEST, {
                 error: true,
               });
         }
@@ -107,7 +125,7 @@ class Controller {
                 data: resData
               });
         } catch (error: any) {
-            return SetResponse.success(res, RESPONSES.BADREQUEST, {
+            return SetResponse.error(res, RESPONSES.BADREQUEST, {
                 error: true,
               });
         }
@@ -128,7 +146,7 @@ class Controller {
               data: resData
             });
         } catch (error: any) {
-            return SetResponse.success(res, RESPONSES.BADREQUEST, {
+            return SetResponse.error(res, RESPONSES.BADREQUEST, {
                 error: true,
               });
         }
@@ -149,7 +167,7 @@ class Controller {
                 data: resData
               });
         } catch (error: any) {
-            return SetResponse.success(res, RESPONSES.BADREQUEST, {
+            return SetResponse.error(res, RESPONSES.BADREQUEST, {
                 error: true,
               });
         }
@@ -168,7 +186,7 @@ class Controller {
               data: resNft
             });
         } catch (error: any) {
-          return SetResponse.success(res, RESPONSES.BADREQUEST, {
+          return SetResponse.error(res, RESPONSES.BADREQUEST, {
               error: true,
             });
         }
@@ -179,16 +197,37 @@ class Controller {
         res: Response
       ): Promise<Interfaces.PromiseResponse> => {
         try {
+          const sortBy = req.query.sortBy ||''
+          const offset = req.query.offset ||0
+          const limit = req.query.limit ||10
+          let query:any = {}
+          if(req.query.status){
+            query.status = req.query.status
+          }
+          if(req.query.price){
+            query.price = req.query.price
+          }
+          if(req.query.item){
+            query.item = req.query.item
+          }
+          if(req.query.categories){
+            query.categories = {
+              [Op.like]: `%${req.query.categories}%`
+            }
+          }
+          if(req.query.chain){
+            query.chain = req.query.chain
+          }
           const walletAddress = req.params.walletAddress
           const user: any = await UserHelper.getOrCreate({walletAddress: walletAddress})
-          const resCollections:any = await CollectionHelper.getCollectionByUser({userId: user.userId})
+          const resCollections:any = await CollectionHelper.getCollectionByUser({userId: user.userId, sortBy: sortBy, query: query})
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data: resCollections
             });
         } catch (error: any) {
           console.log(error)
-          return SetResponse.success(res, RESPONSES.BADREQUEST, {
+          return SetResponse.error(res, RESPONSES.BADREQUEST, {
               error: true,
             });
         }

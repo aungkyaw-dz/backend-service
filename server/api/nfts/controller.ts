@@ -15,6 +15,7 @@ class Controller {
       res: Response
     ): Promise<Interfaces.PromiseResponse> => {
       try {
+        console.log(req.files)
         const data = req.body
         let files:any = req.files?.files
         fs.mkdirSync(`./uploadimages`)
@@ -24,6 +25,7 @@ class Controller {
         files.map((file:any)=>{
           file.mv(`./uploadimages/${file.name}`)
         })
+
         const user:any = await UserHelper.getOrCreate({walletAddress: data.creator})
         data.creator = user.userId
         data.owner = user.userId
@@ -48,37 +50,30 @@ class Controller {
           switch(data.fileType){
             case "image":
               data.tokenId = 1
-              console.log(data.fileType)
+              CollectionHelper.update({logo: data.file}, {collectionId: data.collectionId})
               break;
             case "application":
               data.tokenId = 2
-              console.log(data.fileType)
               break;
             case "text":
               data.tokenId = 3
-              console.log(data.fileType)
               break;
 
             case "video":
               data.tokenId = 4
-              console.log(data.fileType)
               break;
 
             default: 
               data.tokenId = 0
 
           }
-          console.log(data.fileType)
-          console.log(data.tokenId)
           const resData:any = await NftHelper.create(data)
           nftList.push(resData)
-          console.log(imageUrl)
           const metaData = {
             "name": data.name,
             "image":`https://gateway.pinata.cloud/ipfs/${imageUrl.IpfsHash}/${file.name}`,
             "description": data.description
           }
-          console.log(metaData)
 
           fs.writeFileSync(`./${data.collectionName}/${data.fileType}`, JSON.stringify(metaData))
           return metaData

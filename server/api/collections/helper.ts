@@ -36,15 +36,11 @@ class CollectionHelper{
       }
     }
 
-  public async list({name, offset, limit}:{name: any, offset: any, limit: any}) {
+  public async list({sortBy ,query, offset, limit}:{sortBy:any, query: any,offset: any, limit: any}) {
         try {
+            const key = sortBy ? sortBy : "createdAt"
             const res = await CollectionModel.findAll({
-              where:{
-                name: {
-                  [Op.like]:[`%${name}%`]
-                }
-              },
-              include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"}, required: false}, 'Creator'],
+              include: [{model: NftModel, as: 'nfts', where: [query],required: true}, 'Creator'],
               offset: offset,
               limit: limit
             })
@@ -57,11 +53,12 @@ class CollectionHelper{
         }
     }
 
-  public async getCollectionByUser({userId}: {userId: string}) {
+  public async getCollectionByUser({userId, sortBy ,query,}: {userId: string, sortBy:any, query: any,}) {
         try {
+            const key = sortBy ? sortBy : "createdAt"
             const res = await CollectionModel.findAll({
                 where: {creator: userId},
-                include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator'],
+                include: [{model: NftModel, as: 'nfts', where: [query],required: true}, 'Creator'],
             })
             return res
         } catch (err: any) {
@@ -76,9 +73,8 @@ class CollectionHelper{
       try {
           const res:any = await CollectionModel.findOne({
               where: {collectionId: collectionId},
-              include: [{model: NftModel, as: 'nfts'}, 'Creator'],
+              include: [{model: NftModel, as: 'nfts', include: ['Owner']}, 'Creator'],
           })
-          console.log(res)
           return res
       } catch (err: any) {
           return {
