@@ -57,7 +57,7 @@ class CollectionHelper{
         try {
             const key = sortBy ? sortBy : "createdAt"
             const res = await CollectionModel.findAll({
-                where: {creator: userId},
+                where: {owner: userId},
                 include: [{model: NftModel, as: 'nfts', where: [query],required: true}, 'Creator', 'Owner'],
             })
             return res
