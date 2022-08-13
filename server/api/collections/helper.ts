@@ -40,7 +40,7 @@ class CollectionHelper{
         try {
             const key = sortBy ? sortBy : "createdAt"
             const res = await CollectionModel.findAll({
-              include: [{model: NftModel, as: 'nfts', where: [query],required: true}, 'Creator'],
+              include: [{model: NftModel, as: 'nfts', where: [query],required: true}, 'Creator', 'Owner'],
               offset: offset,
               limit: limit
             })
@@ -58,7 +58,7 @@ class CollectionHelper{
             const key = sortBy ? sortBy : "createdAt"
             const res = await CollectionModel.findAll({
                 where: {creator: userId},
-                include: [{model: NftModel, as: 'nfts', where: [query],required: true}, 'Creator'],
+                include: [{model: NftModel, as: 'nfts', where: [query],required: true}, 'Creator', 'Owner'],
             })
             return res
         } catch (err: any) {
@@ -73,7 +73,7 @@ class CollectionHelper{
       try {
           const res:any = await CollectionModel.findOne({
               where: {collectionId: collectionId},
-              include: [{model: NftModel, as: 'nfts', include: ['Owner']}, 'Creator'],
+              include: [{model: NftModel, as: 'nfts', include: ['Owner']}, 'Creator', 'Owner'],
           })
           return res
       } catch (err: any) {
@@ -92,7 +92,7 @@ class CollectionHelper{
               [Op.like]:[`%${name}%`]
             },
             featured: 1},
-            include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator'],
+            include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator', 'Owner'],
             offset: offset,
             limit: limit,
         })
@@ -113,7 +113,7 @@ class CollectionHelper{
                 [Op.like]:[`%${name}%`]
               },
               favourite: 1},
-              include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator'],
+              include: [{model: NftModel, as: 'nfts', where: {status: "MINTED"},required: false}, 'Creator', 'Owner'],
             offset: offset,
             limit: limit,
         })

@@ -15,23 +15,38 @@ class Controller {
       res: Response
     ): Promise<Interfaces.PromiseResponse> => {
       try {
-        console.log(req.files)
         const data = req.body
         let files:any = req.files?.files
         fs.mkdirSync(`./uploadimages`)
         if(!files.length){
           files = [files]
         }
-        files.map((file:any)=>{
-          file.mv(`./uploadimages/${file.name}`)
-        })
+        const imagekitList:any = {} 
+        await Promise.all(
+          files.map(async (file:any)=>{
+            file.mv(`./uploadimages/${file.name}`)
+            const fileUrl = await UploadImage(file)
+            const type = file.mimetype.split('/')[0]
+            imagekitList[type] = {
+              url: fileUrl,
+              name: file.name
+            }
+            return imagekitList
+          })
+        )
 
         const user:any = await UserHelper.getOrCreate({walletAddress: data.creator})
         data.creator = user.userId
         data.owner = user.userId
         let collectionData:any
         if(data.collectionId == "create"){
-          collectionData = await CollectionHelper.create({name: data.collectionName, description: data.collectionDesc, creator: data.creator  })
+          collectionData = await CollectionHelper.create(
+            {
+              name: data.collectionName, 
+              description: data.collectionDesc, 
+              creator: data.creator,  
+              owner: data.creator  
+            })
           data.collectionId = collectionData?.collectionId
         }else{
           collectionData = await CollectionHelper.getCollectionById({collectionId: data.collectionId})
@@ -41,68 +56,39 @@ class Controller {
         
         fs.mkdirSync(`./${data.collectionName}`)
         let nftList:any[] = []
-        await Promise.all(files.map(async (file: any,)=> {
-          const fileUrl = await UploadImage(file)
-          data.file = fileUrl
-          data.name = `${data.name}`
-          data.fileType = file.mimetype.split('/')[0]
-          
-          switch(data.fileType){
-            case "image":
-              data.tokenId = 1
-              CollectionHelper.update({logo: data.file}, {collectionId: data.collectionId})
-              break;
-            case "application":
-              data.tokenId = 2
-              break;
-            case "text":
-              data.tokenId = 3
-              break;
+        let tires = ["image", "application", "text", "video"]
 
-            case "video":
-              data.tokenId = 4
-              break;
-
-            default: 
-              data.tokenId = 0
-
-          }
-          const resData:any = await NftHelper.create(data)
-          nftList.push(resData)
-          const metaData = {
-            "name": data.name,
-            "image":`https://gateway.pinata.cloud/ipfs/${imageUrl.IpfsHash}/${file.name}`,
-            "description": data.description
-          }
-
-          fs.writeFileSync(`./${data.collectionName}/${data.fileType}`, JSON.stringify(metaData))
-          return metaData
-        }))
-        const sourcePath = `${data.collectionName}`
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        let uri:any[] = []
-        let tire:any[] = []
-        const tokenUri:any = await UploadFSToPinata(sourcePath, data.collectionName)
-        let mintData:any ={} 
-        const updatedList =await Promise.all( nftList.map(async (nft)=>{
-          const updateData = {
-            tokenUri: `https://gateway.pinata.cloud/ipfs/${tokenUri.IpfsHash}/${nft.fileType}`,
-            status: "READY"
-          }
-          const updatedNft:any = await NftHelper.update(updateData,{nftId: nft.nftId})
-          uri.push(updatedNft.tokenUri) 
-          tire.push(updatedNft.fileType) 
-          mintData[updatedNft.fileType] = {tokenUri: updatedNft.tokenUri, nftId: nft.nftId}
-          return mintData
-        })
+        await Promise.all(
+          tires.map(async(tire:string)=>{
+            const metaData = {
+              "name": data.name,
+              "image":`https://gateway.pinata.cloud/ipfs/${imageUrl.IpfsHash}/${imagekitList[tire]?.name}`,
+              "description": data.description
+            };
+            await fs.writeFileSync(`./${data.collectionName}/${tire}`, JSON.stringify(metaData));
+            return metaData; 
+          })
         )
-        
+        const sourcePath = `${data.collectionName}`
+        const tokenUri:any = await UploadFSToPinata(sourcePath, data.collectionName)
+        let mintData:any = {}
+        const updatedList =await Promise.all( tires.map(async (tire, index)=>{
+            data.tokenUri = `https://gateway.pinata.cloud/ipfs/${tokenUri.IpfsHash}/${tire}`
+            data.tokenId = index
+            data.file = imagekitList[tire]?.url || ""
+            data.fileType = tire
+            data.status = "minted"
+            const resData:any = await NftHelper.create(data)
+            mintData[tire] = {tokenUri: resData.tokenUri, nftId: resData.nftId}
+            return mintData
+          })
+          )
+
         fs.rmSync(`./uploadimages`, { recursive: true, force: true })
         fs.rmSync(`./${data.collectionName}`, { recursive: true, force: true })
+
         return SetResponse.success(res, RESPONSES.CREATED, {
             error: false,
-            uris: uri,
-            tire: tire,
             collection: collectionData,
             mintData
           });

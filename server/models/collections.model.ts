@@ -23,10 +23,19 @@ const CollectionsModel = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    price: { type: DataTypes.DOUBLE, allowNull: true, defaultValue: 0 },
     creator: {
       type: DataTypes.STRING(200),
       allowNull: true,
     },
+    owner: {
+      type: DataTypes.STRING(200),
+      allowNull: true,
+    },
+    approved: { type: DataTypes.BOOLEAN, defaultValue: 0 },
+    listed: { type: DataTypes.BOOLEAN, defaultValue: 0 },
+    txid: { type: DataTypes.STRING(), allowNull: true },
+    marketId: { type: DataTypes.DOUBLE(), allowNull: true },
     logo: { type: DataTypes.STRING(), allowNull: true },
     banner: { type: DataTypes.STRING(), allowNull: true },
     featured: { type: DataTypes.BOOLEAN, defaultValue: 0 },
@@ -36,6 +45,14 @@ const CollectionsModel = sequelize.define(
     tableName: 'collections',
   }
 );
+CollectionsModel.belongsTo(UsersModel,{
+  as: 'Owner',
+  foreignKey: 'owner'
+})
+UsersModel.hasMany(CollectionsModel, {
+  as: 'createdCoollections',
+  foreignKey: 'owner'
+});
 CollectionsModel.belongsTo(UsersModel, {
   as: 'Creator',
   foreignKey: 'creator'

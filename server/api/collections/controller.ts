@@ -16,6 +16,7 @@ class Controller {
         const walletAddress = data.creator
         const user = await UserHelper.getOrCreate({walletAddress: walletAddress})
         data.creator = user
+        data.owner = user
         const resData = await CollectionHelper.create(data)
         return SetResponse.success(res, RESPONSES.CREATED, {
             error: false,
@@ -39,6 +40,11 @@ class Controller {
           const files:any = req.files
           const logo: any = files?.logo
           const banner: any = files?.banner
+          const walletAddress = data.owner
+          if(walletAddress){
+            const user:any = await UserHelper.getOrCreate({walletAddress: walletAddress})
+            data.owner = user?.userId
+          }
           if(logo){
             const logoUrl = await UploadImage(logo)
             data.logo = logoUrl
@@ -48,6 +54,7 @@ class Controller {
             data.banner = bannerUrl
           }
           const resData = await CollectionHelper.update(data, {collectionId})
+          console.log(resData)
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data : resData

@@ -61,7 +61,7 @@ const NftModel = sequelize.define(
                     return this.getDataValue('categories')?.split(';')
                   },
                   set(val:any) {
-                    if(val.length>1){
+                    if(typeof(val)!='string'){
                       return this.setDataValue('categories',val.join(';'));
                     }else{
                       return this.setDataValue('categoreis', val)
