@@ -35,3 +35,19 @@ export const UploadFSToPinata =async (file:any, name:any) =>{
     return(err)
   }
 }
+
+export const UploadJsonToPinata = async (data:any, name:any) =>{
+  try{
+    const options:any = {
+        pinataMetadata: {
+            name: name,
+           
+        },
+    };
+    const pinataRes = await pinata.pinJSONToIPFS(data, options)
+    return  pinataRes
+  }catch (err){
+    console.log(err)
+    return(err)
+  }
+}

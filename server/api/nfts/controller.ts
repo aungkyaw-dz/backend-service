@@ -5,9 +5,10 @@ import CollectionHelper from '../collections/helper';
 import SetResponse, { RESPONSES } from '../../config/response'
 import UserHelper from '../users/helper'
 import { UploadImage } from '../../middleware/imagekitUpload';
-import { UploadFSToPinata, UploadFilesToPinata } from '../../middleware/pinataUpload';
+import {  UploadFilesToAWS } from '../../middleware/aws-s3';
+import { UploadFSToPinata, UploadFilesToPinata, UploadJsonToPinata } from '../../middleware/pinataUpload';
 const { Op } = require("sequelize");
-
+const {IMAGEKIT_ENDPOINT} = process.env
 const fs = require('fs')
 class Controller {
   create = async (
@@ -25,12 +26,16 @@ class Controller {
         await Promise.all(
           files.map(async (file:any)=>{
             file.mv(`./uploadimages/${file.name}`)
-            const fileUrl = await UploadImage(file)
-            const type = file.mimetype.split('/')[0]
+            const fileUrl:any = await UploadFilesToAWS(file)
+            let type = file.mimetype.split('/')[0]
+            if(type=="audio"){
+              type = "video"
+            }
             imagekitList[type] = {
-              url: fileUrl,
+              url: `${IMAGEKIT_ENDPOINT}/${file.name}`,
               name: file.name
             }
+            console.log(imagekitList)
             return imagekitList
           })
         )
@@ -45,7 +50,9 @@ class Controller {
               name: data.collectionName, 
               description: data.collectionDesc, 
               creator: data.creator,  
-              owner: data.creator  
+              owner: data.creator,
+              facebook: data.facebook,
+              discord: data.discord  
             })
           data.collectionId = collectionData?.collectionId
         }else{
@@ -195,6 +202,34 @@ class Controller {
   ): Promise<Interfaces.PromiseResponse> =>{
     try{
       const data = req.body
+      let files:any = req.files?.files
+      const collectionId = req.params.collectionId
+      const collection = await CollectionHelper.getCollectionById({collectionId})
+      if(!files.length){
+        files = [files]
+      }
+      await Promise.all(
+        files.map(async (file:any)=>{
+          file.mv(`./uploadimages/${file.name}`)
+          const fileUrl = await UploadFilesToAWS(file)
+          let type = file.mimetype.split('/')[0]
+          const pintaImageUrl:any = await UploadFilesToPinata(file, collection.name)
+          const metaData = {
+            "name": collection.nfts[0].name,
+            "image":`https://gateway.pinata.cloud/ipfs/${pintaImageUrl.IpfsHash}`,
+            "description": collection.nfts[0].description
+          }
+          const pinataMetadata:any = await UploadJsonToPinata(metaData, collection.name)
+          const updateData = {
+            tokenUri: `https://gateway.pinata.cloud/ipfs/${pinataMetadata.IpfsHash}`,
+            file: `${IMAGEKIT_ENDPOINT}/${file.name}`,
+          }
+          if(type==="audio"){
+            type= "video"
+          }
+          const updatedNft = await NftHelper.updateByCollection(updateData, {collectionId: collection.collectionId, fileType: type})
+        })
+      )
       const updateList = data.updateList
       let updatedList: any[] = []
       if(updateList.length > 0){

@@ -38,6 +38,33 @@ class NftHelper{
         };
       }
     }
+  
+  public async updateByCollection(data: any, {collectionId, fileType}: {collectionId: string, fileType: string}) {
+      try {
+        const res = await NFTsModel.update(data, {
+            where: {
+              collectionId: collectionId,
+              fileType: fileType
+            },
+        })
+        if(res){
+          const updatedData = await NFTsModel.findOne({
+            where: {collectionId: collectionId, fileType: fileType},
+            include:['Owner', 'Creator'],
+            raw: true
+          })
+
+          return updatedData
+        }
+        return res
+          
+      } catch (err: any) {
+        return {
+          error: true,
+          message: err.message,
+        };
+      }
+    }
 
   public async list({sortBy ,query,offset, limit}:{sortBy:any, query: any,offset: any, limit: any}) {
         try {
