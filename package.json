@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npx tsc",
     "compile": "ts-node build.ts && tsc",
-    "start": "ts-node server/index.ts",
+    "start": "ts-node  --optimize_for_size --max_old_space_size=460 server/index.ts",
     "vercel": "vercel dev",
     "deploy": "vercel deploy --prod",
     "dev": "nodemon --exec npx ts-node server/index.ts --ext ts",
