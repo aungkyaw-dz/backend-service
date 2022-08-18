@@ -52,7 +52,8 @@ class Controller {
               creator: data.creator,  
               owner: data.creator,
               facebook: data.facebook,
-              discord: data.discord  
+              discord: data.discord,
+              logo: imagekitList['image'].url
             })
           data.collectionId = collectionData?.collectionId
         }else{
