@@ -19,6 +19,7 @@ class Controller {
         const data = req.body
         let files:any = req.files?.files
         fs.mkdirSync(`./uploadimages`)
+        fs.mkdirSync(`./metadata`)
         if(!files.length){
           files = [files]
         }
@@ -31,11 +32,16 @@ class Controller {
             if(type=="audio"){
               type = "video"
             }
+            if(type=="application"){
+                const ext = file.mimetype.split('/')[1]
+                if(ext != 'pdf'){
+                  type= "text"
+                }
+            }
             imagekitList[type] = {
               url: `${IMAGEKIT_ENDPOINT}/${file.name}`,
               name: file.name
             }
-            console.log(imagekitList)
             return imagekitList
           })
         )
@@ -61,8 +67,6 @@ class Controller {
           data.collectionName = collectionData.name
         }
         const imageUrl:any = await UploadFSToPinata('uploadimages', data.collectionName)
-        
-        fs.mkdirSync(`./${data.collectionName}`)
         let nftList:any[] = []
         let tires = ["image", "application", "text", "video"]
 
@@ -73,11 +77,11 @@ class Controller {
               "image":`https://gateway.pinata.cloud/ipfs/${imageUrl.IpfsHash}/${imagekitList[tire]?.name}`,
               "description": data.description
             };
-            await fs.writeFileSync(`./${data.collectionName}/${tire}`, JSON.stringify(metaData));
+            await fs.writeFileSync(`./metadata/${tire}`, JSON.stringify(metaData));
             return metaData; 
           })
         )
-        const sourcePath = `${data.collectionName}`
+        const sourcePath = `metadata`
         const tokenUri:any = await UploadFSToPinata(sourcePath, data.collectionName)
         let mintData:any = {}
         const updatedList =await Promise.all( tires.map(async (tire, index)=>{
@@ -93,7 +97,7 @@ class Controller {
           )
 
         fs.rmSync(`./uploadimages`, { recursive: true, force: true })
-        fs.rmSync(`./${data.collectionName}`, { recursive: true, force: true })
+        fs.rmSync(`./metadata`, { recursive: true, force: true })
 
         return SetResponse.success(res, RESPONSES.CREATED, {
             error: false,
@@ -101,6 +105,13 @@ class Controller {
             mintData
           });
       } catch (error: any) {
+          if (fs.existsSync('./uploadimages')) {
+            fs.rmSync(`./uploadimages`, { recursive: true, force: true })
+          }
+          if (fs.existsSync('./metadata')) {
+            fs.rmSync(`./metadata`, { recursive: true, force: true })
+          }
+          console.log(error)
           return SetResponse.success(res, RESPONSES.BADREQUEST, {
               error: true,
               msg: error.message
@@ -228,20 +239,22 @@ class Controller {
           if(type==="audio"){
             type= "video"
           }
-          const updatedNft = await NftHelper.updateByCollection(updateData, {collectionId: collection.collectionId, fileType: type})
+          const resData:any = await NftHelper.updateByCollection(updateData, {collectionId: collection.collectionId, fileType: type})
+        })
+      
+      )
+      const nfts:any = await NftHelper.getListByCollection({collectionId: collection.collectionId})
+      let mintData:any = {}
+      await Promise.all(
+        nfts.map((nft:any)=> {
+          mintData[nft.fileType] = {tokenUri: nft.tokenUri, nftId: nft.nftId}
+          return mintData
         })
       )
-      const updateList = data.updateList
-      let updatedList: any[] = []
-      if(updateList.length > 0){
-        updateList.map(async (updateData:any)=>{
-          const resData = await NftHelper.update(updateData, {nftId: updateData.nftId})
-          updatedList = [...updatedList, resData]
-        })
-      }
+
       return SetResponse.success(res, RESPONSES.SUCCESS, {
         error: false,
-        data: updatedList
+        mintData
       }); 
     }catch(error:any){
       return SetResponse.success(res, RESPONSES.BADREQUEST, {
