@@ -42,7 +42,10 @@ class CollectionHelper{
             const res = await CollectionModel.findAll({
               include: [{model: NftModel, as: 'nfts', where: [query],required: true}, 'Creator', 'Owner'],
               offset: offset,
-              limit: limit
+              limit: limit,
+              order: [
+                [key, 'DESC']
+              ]
             })
             return res
         } catch (err: any) {
@@ -53,12 +56,17 @@ class CollectionHelper{
         }
     }
 
-  public async getCollectionByUser({userId, sortBy ,query,}: {userId: string, sortBy:any, query: any,}) {
+  public async getCollectionByUser({userId, sortBy ,query,limit, offset}: {userId: string, sortBy:any, query: any,limit:number, offset:number}) {
         try {
             const key = sortBy ? sortBy : "createdAt"
             const res = await CollectionModel.findAll({
                 where: {owner: userId},
                 include: [{model: NftModel, as: 'nfts', where: [query],required: true}, 'Creator', 'Owner'],
+                limit: limit,
+                offset: offset,
+                order: [
+                  [key, 'DESC']
+                ]
             })
             return res
         } catch (err: any) {

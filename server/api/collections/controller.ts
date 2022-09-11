@@ -205,8 +205,8 @@ class Controller {
       ): Promise<Interfaces.PromiseResponse> => {
         try {
           const sortBy = req.query.sortBy ||''
-          const offset = req.query.offset ||0
-          const limit = req.query.limit ||10
+          const offset = Number(req.query.offset) ||0
+          const limit = Number(req.query.limit) ||10
           let query:any = {}
           if(req.query.status){
             query.status = req.query.status
@@ -227,7 +227,7 @@ class Controller {
           }
           const walletAddress = req.params.walletAddress
           const user: any = await UserHelper.getOrCreate({walletAddress: walletAddress})
-          const resCollections:any = await CollectionHelper.getCollectionByUser({userId: user.userId, sortBy: sortBy, query: query})
+          const resCollections:any = await CollectionHelper.getCollectionByUser({userId: user.userId, sortBy: sortBy, query: query, limit: limit, offset: offset})
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data: resCollections
