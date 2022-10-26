@@ -29,14 +29,23 @@ class Controller {
             file.mv(`./uploadimages/${file.name}`)
             const fileUrl:any = await UploadFilesToAWS(file)
             let type = file.mimetype.split('/')[0]
-            if(type=="audio"){
-              type = "video"
-            }
             if(type=="application"){
                 const ext = file.mimetype.split('/')[1]
-                if(ext != 'pdf'){
-                  type= "text"
+                console.log(ext)
+                switch (ext){
+                  case "pdf":
+                    type = "pdf"
+                    break;
+                  case "x-zip-compressed":
+                    type= "zip"
+                    break;
+                  default:
+                    type = 'text'
+                    break;
                 }
+                // if(ext != 'pdf' && ext!= 'x-zip-compressed'){
+                //   type= "text"
+                // }
             }
             imagekitList[type] = {
               url: `${IMAGEKIT_ENDPOINT}/${file.name}`,
@@ -45,6 +54,8 @@ class Controller {
             return imagekitList
           })
         )
+
+        console.log(imagekitList)
 
         const user:any = await UserHelper.getOrCreate({walletAddress: data.creator})
         data.creator = user.userId
@@ -68,7 +79,7 @@ class Controller {
         }
         const imageUrl:any = await UploadFSToPinata('uploadimages', data.collectionName)
         let nftList:any[] = []
-        let tires = ["image", "application", "text", "video"]
+        let tires = ["image", "pdf", "text", "audio", "video", "zip"]
 
         await Promise.all(
           tires.map(async(tire:string)=>{
@@ -95,7 +106,7 @@ class Controller {
             return mintData
           })
           )
-
+        console.log(mintData)
         fs.rmSync(`./uploadimages`, { recursive: true, force: true })
         fs.rmSync(`./metadata`, { recursive: true, force: true })
 
