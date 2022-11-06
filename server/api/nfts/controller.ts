@@ -7,6 +7,7 @@ import UserHelper from '../users/helper'
 import { UploadImage } from '../../middleware/imagekitUpload';
 import {  UploadFilesToAWS } from '../../middleware/aws-s3';
 import { UploadFSToPinata, UploadFilesToPinata, UploadJsonToPinata } from '../../middleware/pinataUpload';
+import NftModel from '../../models/nfts.model';
 const { Op } = require("sequelize");
 const {IMAGEKIT_ENDPOINT} = process.env
 const fs = require('fs')
@@ -18,6 +19,7 @@ class Controller {
       try {
         const data = req.body
         let files:any = req.files?.files
+        console.log(files)
         fs.mkdirSync(`./uploadimages`)
         fs.mkdirSync(`./metadata`)
         if(!files.length){
@@ -30,17 +32,19 @@ class Controller {
             const fileUrl:any = await UploadFilesToAWS(file)
             let type = file.mimetype.split('/')[0]
             if(type=="application"){
-                const ext = file.mimetype.split('/')[1]
-                console.log(ext)
-                switch (ext){
-                  case "pdf":
+                const ext = file.name.split('.').pop()
+                switch (true){
+                  case ["pdf"].includes(ext):
                     type = "pdf"
                     break;
-                  case "x-zip-compressed":
+                  case ['zip', 'rar'].includes(ext):
                     type= "zip"
                     break;
+                  case ['doc','doxc','txt'].includes(ext):
+                    type= "text"
+                    break;
                   default:
-                    type = 'text'
+                    type = 'application'
                     break;
                 }
                 // if(ext != 'pdf' && ext!= 'x-zip-compressed'){
@@ -54,8 +58,6 @@ class Controller {
             return imagekitList
           })
         )
-
-        console.log(imagekitList)
 
         const user:any = await UserHelper.getOrCreate({walletAddress: data.creator})
         data.creator = user.userId
@@ -102,14 +104,13 @@ class Controller {
             data.fileType = tire
             data.status = "minted"
             const resData:any = await NftHelper.create(data)
+            // const nftUsers:any = await NftHelper.addNftUser({userId: user.userId, nftId: resData.nftId, quantity: resData.quantity})
             mintData[tire] = {tokenUri: resData.tokenUri, nftId: resData.nftId}
             return mintData
           })
           )
-        console.log(mintData)
         fs.rmSync(`./uploadimages`, { recursive: true, force: true })
         fs.rmSync(`./metadata`, { recursive: true, force: true })
-
         return SetResponse.success(res, RESPONSES.CREATED, {
             error: false,
             collection: collectionData,
@@ -130,75 +131,100 @@ class Controller {
       }
     };
 
-  bulkCreate = async (
-      req: Request,
-      res: Response
-    ): Promise<Interfaces.PromiseResponse> => {
-      try {
-        const data = req.body
-        let files:any = req.files?.files
-        // data.categories = JSON.stringify(data.categories)
-        fs.mkdirSync(`./uploadimages`)
-        if(!files.length){
-          files = [files]
-        }
-        files.map((file:any)=>{
-          file.mv(`./uploadimages/${file.name}`)
-        })
-        const user:any = await UserHelper.getOrCreate({walletAddress: data.creator})
-        data.creator = user.userId
-        data.owner = user.userId
-        if(data.collectionId == "create"){
-          const collectionData:any = await CollectionHelper.create({name: data.collectionName, description: data.collectionDesc, creator: data.creator  })
-          data.collectionId = collectionData?.collectionId
-        }else{
-          const collectionData:any = await CollectionHelper.getCollectionById({collectionId: data.collectionId})
-          data.collectionName = collectionData.name
-        }
-        const imageUrl:any = await UploadFSToPinata('uploadimages', data.collectionName)
+  // bulkCreate = async (
+  //     req: Request,
+  //     res: Response
+  //   ): Promise<Interfaces.PromiseResponse> => {
+  //     try {
+  //       const data = req.body
+  //       let files:any = req.files?.files
+  //       // data.categories = JSON.stringify(data.categories)
+  //       fs.mkdirSync(`./uploadimages`)
+  //       if(!files.length){
+  //         files = [files]
+  //       }
+  //       files.map((file:any)=>{
+  //         file.mv(`./uploadimages/${file.name}`)
+  //       })
+  //       const user:any = await UserHelper.getOrCreate({walletAddress: data.creator})
+  //       data.creator = user.userId
+  //       data.owner = user.userId
+  //       if(data.collectionId == "create"){
+  //         const collectionData:any = await CollectionHelper.create({name: data.collectionName, description: data.collectionDesc, creator: data.creator  })
+  //         data.collectionId = collectionData?.collectionId
+  //       }else{
+  //         const collectionData:any = await CollectionHelper.getCollectionById({collectionId: data.collectionId})
+  //         data.collectionName = collectionData.name
+  //       }
+  //       const imageUrl:any = await UploadFSToPinata('uploadimages', data.collectionName)
         
-        fs.mkdirSync(`./${data.collectionName}`)
-        let nftList:any[] = []
-        files.map(async (file: any, index:any)=> {
-          console.log(file, "<<<<<<<<<<<<<<<<<<<<<<")
-          const logoUrl = await UploadImage(file)
-          data.logo = logoUrl
-          data.name = `${data.name}`
-          const resData:any = await NftHelper.create(data)
-          nftList.push(resData)
-          const metaData = {
-            "name": data.name,
-            "image":`https://gateway.pinata.cloud/ipfs/${imageUrl.IpfsHash}/${file.name}`,
-            "description": data.description
-          }
-          fs.writeFileSync(`./${data.collectionName}/${index+1}`, JSON.stringify(metaData))
-        })
-        const sourcePath = `${data.collectionName}`
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        const tokenUri:any = await UploadFSToPinata(sourcePath, data.collectionName)
-        let updateList:any[]=[]
-        nftList.map(async (nft, index)=>{
-          const updateData = {
-            tokenUri: `https://gateway.pinata.cloud/ipfs/${tokenUri.IpfsHash}/${index+1}`,
-            status: "READY"
-          }
-          const updatedNft = await NftHelper.update(updateData,{nftId: nft.nftId})
-          updateList.push(updatedNft)
-        })
-        fs.rmSync(`./uploadimages`, { recursive: true, force: true })
-        fs.rmSync(`./${data.collectionName}`, { recursive: true, force: true })
-        return SetResponse.success(res, RESPONSES.CREATED, {
-            error: false,
-            data: updateList
-          });
-      } catch (error: any) {
-          return SetResponse.success(res, RESPONSES.BADREQUEST, {
-              error: true,
-              msg: error.message
-            });
-      }
-    };
+  //       fs.mkdirSync(`./${data.collectionName}`)
+  //       let nftList:any[] = []
+  //       files.map(async (file: any, index:any)=> {
+  //         console.log(file, "<<<<<<<<<<<<<<<<<<<<<<")
+  //         const logoUrl = await UploadImage(file)
+  //         data.logo = logoUrl
+  //         data.name = `${data.name}`
+  //         const resData:any = await NftHelper.create(data)
+  //         nftList.push(resData)
+  //         const metaData = {
+  //           "name": data.name,
+  //           "image":`https://gateway.pinata.cloud/ipfs/${imageUrl.IpfsHash}/${file.name}`,
+  //           "description": data.description
+  //         }
+  //         fs.writeFileSync(`./${data.collectionName}/${index+1}`, JSON.stringify(metaData))
+  //       })
+  //       const sourcePath = `${data.collectionName}`
+  //       await new Promise(resolve => setTimeout(resolve, 5000));
+  //       const tokenUri:any = await UploadFSToPinata(sourcePath, data.collectionName)
+  //       let updateList:any[]=[]
+  //       nftList.map(async (nft, index)=>{
+  //         const updateData = {
+  //           tokenUri: `https://gateway.pinata.cloud/ipfs/${tokenUri.IpfsHash}/${index+1}`,
+  //           status: "READY"
+  //         }
+  //         const updatedNft = await NftHelper.update(updateData,{nftId: nft.nftId})
+  //         updateList.push(updatedNft)
+  //       })
+  //       fs.rmSync(`./uploadimages`, { recursive: true, force: true })
+  //       fs.rmSync(`./${data.collectionName}`, { recursive: true, force: true })
+  //       return SetResponse.success(res, RESPONSES.CREATED, {
+  //           error: false,
+  //           data: updateList
+  //         });
+  //     } catch (error: any) {
+  //         return SetResponse.success(res, RESPONSES.BADREQUEST, {
+  //             error: true,
+  //             msg: error.message
+  //           });
+  //     }
+  //   };
 
+  // asdf = async (
+  //   req: Request,
+  //   res: Response
+  // ): Promise<Interfaces.PromiseResponse> => {
+  //   try {
+  //       const data = req.body
+  //       const user:any = await UserHelper.getOrCreate({walletAddress: "0x6d9beA681678f75e6d1bc43012F4e7FB54a6E068"})
+  //       console.log(user)
+  //       const resData:any = await NftModel.findOne({
+  //         where:{
+  //           nftId: "1"
+  //         },
+  //       })
+  //       const users = await resData.getOwners({ attributes: ['userId'] })
+  //       return SetResponse.success(res, RESPONSES.SUCCESS, {
+  //           error: false,
+  //           data: users
+  //         });
+  //   } catch (error: any) {
+  //     console.log(error)
+  //     return SetResponse.success(res, RESPONSES.BADREQUEST, {
+  //         error: true,
+  //       });
+  //   }
+  // };
   update = async (
       req: Request,
       res: Response
@@ -206,7 +232,6 @@ class Controller {
       try {
           const data = req.body
           const nftId = req.params.nftId
-
           const resData = await NftHelper.update(data, {nftId})
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
@@ -219,60 +244,83 @@ class Controller {
       }
     };
 
-  bulkUpdate = async(
-    req: Request,
-    res: Response
-  ): Promise<Interfaces.PromiseResponse> =>{
-    try{
-      const data = req.body
-      let files:any = req.files?.files
-      const collectionId = req.params.collectionId
-      const collection = await CollectionHelper.getCollectionById({collectionId})
-      if(!files.length){
-        files = [files]
+  updateOwner = async (
+      req: Request,
+      res: Response
+    ): Promise<Interfaces.PromiseResponse> => {
+      try {
+          let data = req.body
+          const nftId = req.params.nftId
+          const user:any = await UserHelper.getOrCreate({walletAddress: data.owner})
+          data.owner = user.userId
+          console.log(nftId)
+          console.log(user)
+          const resData = await NftHelper.update(data, {nftId})
+          return SetResponse.success(res, RESPONSES.SUCCESS, {
+              error: false,
+              data: resData
+            });
+      } catch (error: any) {
+          return SetResponse.success(res, RESPONSES.BADREQUEST, {
+              error: true,
+            });
       }
-      await Promise.all(
-        files.map(async (file:any)=>{
-          file.mv(`./uploadimages/${file.name}`)
-          const fileUrl = await UploadFilesToAWS(file)
-          let type = file.mimetype.split('/')[0]
-          const pintaImageUrl:any = await UploadFilesToPinata(file, collection.name)
-          const metaData = {
-            "name": collection.nfts[0].name,
-            "image":`https://gateway.pinata.cloud/ipfs/${pintaImageUrl.IpfsHash}`,
-            "description": collection.nfts[0].description
-          }
-          const pinataMetadata:any = await UploadJsonToPinata(metaData, collection.name)
-          const updateData = {
-            tokenUri: `https://gateway.pinata.cloud/ipfs/${pinataMetadata.IpfsHash}`,
-            file: `${IMAGEKIT_ENDPOINT}/${file.name}`,
-          }
-          if(type==="audio"){
-            type= "video"
-          }
-          const resData:any = await NftHelper.updateByCollection(updateData, {collectionId: collection.collectionId, fileType: type})
-        })
-      
-      )
-      const nfts:any = await NftHelper.getListByCollection({collectionId: collection.collectionId})
-      let mintData:any = {}
-      await Promise.all(
-        nfts.map((nft:any)=> {
-          mintData[nft.fileType] = {tokenUri: nft.tokenUri, nftId: nft.nftId}
-          return mintData
-        })
-      )
+    };
 
-      return SetResponse.success(res, RESPONSES.SUCCESS, {
-        error: false,
-        mintData
-      }); 
-    }catch(error:any){
-      return SetResponse.success(res, RESPONSES.BADREQUEST, {
-        error: true,
-      });
-    }
-  }
+  // bulkUpdate = async(
+  //   req: Request,
+  //   res: Response
+  // ): Promise<Interfaces.PromiseResponse> =>{
+  //   try{
+  //     const data = req.body
+  //     let files:any = req.files?.files
+  //     const collectionId = req.params.collectionId
+  //     const collection = await CollectionHelper.getCollectionById({collectionId})
+  //     if(!files.length){
+  //       files = [files]
+  //     }
+  //     await Promise.all(
+  //       files.map(async (file:any)=>{
+  //         file.mv(`./uploadimages/${file.name}`)
+  //         const fileUrl = await UploadFilesToAWS(file)
+  //         let type = file.mimetype.split('/')[0]
+  //         const pintaImageUrl:any = await UploadFilesToPinata(file, collection.name)
+  //         const metaData = {
+  //           "name": collection.nfts[0].name,
+  //           "image":`https://gateway.pinata.cloud/ipfs/${pintaImageUrl.IpfsHash}`,
+  //           "description": collection.nfts[0].description
+  //         }
+  //         const pinataMetadata:any = await UploadJsonToPinata(metaData, collection.name)
+  //         const updateData = {
+  //           tokenUri: `https://gateway.pinata.cloud/ipfs/${pinataMetadata.IpfsHash}`,
+  //           file: `${IMAGEKIT_ENDPOINT}/${file.name}`,
+  //         }
+  //         if(type==="audio"){
+  //           type= "video"
+  //         }
+  //         const resData:any = await NftHelper.updateByCollection(updateData, {collectionId: collection.collectionId, fileType: type})
+  //       })
+      
+  //     )
+  //     const nfts:any = await NftHelper.getListByCollection({collectionId: collection.collectionId})
+  //     let mintData:any = {}
+  //     await Promise.all(
+  //       nfts.map((nft:any)=> {
+  //         mintData[nft.fileType] = {tokenUri: nft.tokenUri, nftId: nft.nftId}
+  //         return mintData
+  //       })
+  //     )
+
+  //     return SetResponse.success(res, RESPONSES.SUCCESS, {
+  //       error: false,
+  //       mintData
+  //     }); 
+  //   }catch(error:any){
+  //     return SetResponse.success(res, RESPONSES.BADREQUEST, {
+  //       error: true,
+  //     });
+  //   }
+  // }
 
   list = async (
         req: Request,

@@ -35,6 +35,7 @@ const NftModel = sequelize.define(
       defaultValue: 'PENDING',
     },
     tokenId: { type: DataTypes.INTEGER(), defaultValue: 0 },
+    quantity: { type: DataTypes.INTEGER(), defaultValue: 1 },
     owner: { type: DataTypes.STRING(200), allowNull: true },
     creator: { type: DataTypes.STRING(200), allowNull: true },
     txid: { type: DataTypes.STRING(), allowNull: true },

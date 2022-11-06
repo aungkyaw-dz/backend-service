@@ -4,9 +4,11 @@ import controller from './controller';
 export default express
     .Router()
     .post('/create', controller.create)
-    .post('/bulkCreate', controller.bulkCreate)
+    // .post('/bulkCreate', controller.bulkCreate)
     .post('/update/:nftId', controller.update)
-    .post('/bulkUpdate', controller.bulkUpdate)
+    // .get('/asdf', controller.asdf)
+    .post('/updateOwner/:nftId', controller.updateOwner)
+    // .post('/bulkUpdate', controller.bulkUpdate)
     .get('/list', controller.list)
     .get('/getAllCategories',controller.getAllCategories)
     .get('/:nftId', controller.getNftById)

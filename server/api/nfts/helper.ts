@@ -1,13 +1,17 @@
+import { where } from 'sequelize/types';
 import NFTsModel from '../../models/nfts.model';
+import UsersModel from '../../models/users.model';
+import UserNftModel from '../../models/user_nft.model';
 const { Op } = require("sequelize");
 
 class NftHelper{
 
   public async create(data:any) {
     try {
-      const res = await NFTsModel.create(data)
+      const res:any = await NFTsModel.create(data)
       return res
     } catch (err: any) {
+      console.log(err)
       return {
         error: true,
         message: err.message,
@@ -39,6 +43,27 @@ class NftHelper{
       }
     }
   
+  // public async addNftUser({userId, nftId, quantity}: {userId: string, nftId: string, quantity: number}) {
+  //     try {
+  //       const res:any = await UserNftModel.findOrCreate({
+  //         where: {
+  //           userUserId: userId,
+  //           nftNftId: nftId
+  //         },
+  //         defaults: {
+  //           quantity: quantity
+  //         }
+  //       })
+  //       return res
+  //     } catch (err: any) {
+  //       console.log(err)
+  //       return {
+  //         error: true,
+  //         message: err.message,
+  //       };
+  //     }
+  //   }
+
   public async updateByCollection(data: any, {collectionId, fileType}: {collectionId: string, fileType: string}) {
       try {
         const res = await NFTsModel.update(data, {

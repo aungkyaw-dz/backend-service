@@ -40,7 +40,7 @@ const sequelize = new Sequelize(
 // Sync all models on application startup, during `development` environment
 const runDB = () => {
   try {
-
+    
     sequelize.authenticate().then(()=>{
       console.log("connected")
     });
