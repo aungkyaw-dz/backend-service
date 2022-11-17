@@ -1,4 +1,5 @@
 import CollectionModel from '../../models/collections.model';
+import ListModel from '../../models/lists.model';
 import NftModel from '../../models/nfts.model';
 const { Op } = require("sequelize");
 class CollectionHelper{
@@ -81,7 +82,13 @@ class CollectionHelper{
       try {
           const res:any = await CollectionModel.findOne({
               where: {collectionId: collectionId},
-              include: [{model: NftModel, as: 'nfts', include: ['Owner']}, 'Creator', 'Owner'],
+              include: [
+                {model: NftModel, as: 'nfts', include: ['Owner']},
+                'Creator', 
+                'Owner', 
+                {model: ListModel, as: 'listedItems', include: ['Creator']}
+              ],
+              order: [['listedItems', 'status', 'asc']]
           })
           return res
       } catch (err: any) {

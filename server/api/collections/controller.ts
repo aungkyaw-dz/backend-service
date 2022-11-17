@@ -4,6 +4,7 @@ import CollectionHelper from './helper';
 import SetResponse, { RESPONSES } from '../../config/response'
 import { UploadImage } from '../../middleware/imagekitUpload';
 import UserHelper from '../users/helper'
+import ListHelper from '../lists/helper'
 const { Op } = require("sequelize");
 
 class Controller {
@@ -228,6 +229,30 @@ class Controller {
           const walletAddress = req.params.walletAddress
           const user: any = await UserHelper.getOrCreate({walletAddress: walletAddress})
           const resCollections:any = await CollectionHelper.getCollectionByUser({userId: user.userId, sortBy: sortBy, query: query, limit: limit, offset: offset})
+          return SetResponse.success(res, RESPONSES.SUCCESS, {
+              error: false,
+              data: resCollections
+            });
+        } catch (error: any) {
+          console.log(error)
+          return SetResponse.error(res, RESPONSES.BADREQUEST, {
+              error: true,
+            });
+        }
+      }; 
+
+  addList = async (
+        req: Request,
+        res: Response
+      ): Promise<Interfaces.PromiseResponse> => {
+        try {
+          const collectionId = req.params.collectionId
+          let data = req.body
+          const walletAddress = data.walletAddress
+          const user: any = await UserHelper.getOrCreate({walletAddress: walletAddress})
+          data.creator= user.userId
+          data.collectionId= collectionId
+          const resCollections:any = await ListHelper.create(data)
           return SetResponse.success(res, RESPONSES.SUCCESS, {
               error: false,
               data: resCollections
