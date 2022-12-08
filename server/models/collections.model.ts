@@ -40,6 +40,10 @@ const CollectionsModel = sequelize.define(
       type: DataTypes.STRING(200),
       allowNull: true,
     },
+    totalNft: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1
+    },
     approved: { type: DataTypes.BOOLEAN, defaultValue: 0 },
     listed: { type: DataTypes.BOOLEAN, defaultValue: 0 },
     txid: { type: DataTypes.STRING(), allowNull: true },

@@ -86,7 +86,7 @@ class CollectionHelper{
                 {model: NftModel, as: 'nfts', include: ['Owner']},
                 'Creator', 
                 'Owner', 
-                {model: ListModel, as: 'listedItems', include: ['Creator']}
+                {model: ListModel, as: 'listedItems', where: {status: "LISTING"}, required: false,  include: ['Creator']}
               ],
               order: [['listedItems', 'status', 'asc']]
           })
