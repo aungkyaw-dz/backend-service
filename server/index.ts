@@ -24,9 +24,5 @@ app.use('/', routers);
 dbConnection
 
 app.listen(port, () => {
-  const used = process.memoryUsage().heapUsed;
-  for (const [key,value] of Object.entries(process.memoryUsage())){
-    console.log(`Memory usage by ${key}, ${value/1000000}MB `)
-  }
   console.log(`Server is running at https://localhost:${port}`);
 });
