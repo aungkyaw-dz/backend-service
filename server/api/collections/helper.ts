@@ -41,6 +41,11 @@ class CollectionHelper{
         try {
             const key = sortBy ? sortBy : "createdAt"
             const res = await CollectionModel.findAll({
+              where: {
+                address: {
+                  [Op.ne]: null
+                }
+              },
               include: [{model: NftModel, as: 'nfts', where: [query],required: true}, 'Creator', 'Owner'],
               offset: offset,
               limit: limit,
