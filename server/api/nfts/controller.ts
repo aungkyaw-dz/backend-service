@@ -4,7 +4,7 @@ import NftHelper from './helper';
 import CollectionHelper from '../collections/helper';
 import SetResponse, { RESPONSES } from '../../config/response'
 import UserHelper from '../users/helper'
-import { UploadImage } from '../../middleware/imagekitUpload';
+// import { UploadImage } from '../../middleware/imagekitUpload';
 import {  UploadFilesToAWS } from '../../middleware/aws-s3';
 import { UploadFSToPinata, UploadFilesToPinata, UploadJsonToPinata } from '../../middleware/pinataUpload';
 import NftModel from '../../models/nfts.model';

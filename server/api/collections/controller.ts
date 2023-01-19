@@ -3,6 +3,8 @@ import * as Interfaces from '../../config/interface';
 import CollectionHelper from './helper';
 import SetResponse, { RESPONSES } from '../../config/response'
 import { UploadImage } from '../../middleware/imagekitUpload';
+import {  UploadFilesToAWS } from '../../middleware/aws-s3';
+
 import UserHelper from '../users/helper'
 import ListHelper from '../lists/helper'
 const { Op } = require("sequelize");
@@ -47,11 +49,11 @@ class Controller {
             data.owner = user?.userId
           }
           if(logo){
-            const logoUrl = await UploadImage(logo)
+            const logoUrl = await UploadFilesToAWS(logo)
             data.logo = logoUrl
           }
           if(banner){
-            const bannerUrl = await UploadImage(banner)
+            const bannerUrl = await UploadFilesToAWS(banner)
             data.banner = bannerUrl
           }
           const resData = await CollectionHelper.update(data, {collectionId})

@@ -1,7 +1,7 @@
 import pinataClient from '@pinata/sdk';
 import CONFIG from '../config/env';
 
-const pinata = pinataClient(CONFIG.PINATA.KEY, CONFIG.PINATA.SECRET);
+const pinata = new pinataClient(CONFIG.PINATA.KEY, CONFIG.PINATA.SECRET);
 
 export const UploadFilesToPinata =async (file:any, name:any) =>{
   try{

@@ -2,7 +2,9 @@ import { Request, Response } from 'express';
 import * as Interfaces from '../../config/interface';
 import UserHelper from './helper';
 import SetResponse, { RESPONSES } from '../../config/response'
-import { UploadImage } from '../../middleware/imagekitUpload';
+// import { UploadImage } from '../../middleware/imagekitUpload';
+import {  UploadFilesToAWS } from '../../middleware/aws-s3';
+
 class Controller {
   getUserOrCreat = async (
       req: Request,
@@ -33,7 +35,7 @@ class Controller {
           const files:any = req.files
           const profileImage: any = files?.profileImage
           if(profileImage){
-            const profileUrl = await UploadImage(profileImage)
+            const profileUrl = await UploadFilesToAWS(profileImage)
             data.profileImage = profileUrl
           }
           // if(banner){

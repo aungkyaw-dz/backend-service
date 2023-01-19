@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import * as Interfaces from '../../config/interface';
 import AdminHelper from './helper';
 import SetResponse, { RESPONSES } from '../../config/response'
-import { UploadImage } from '../../middleware/imagekitUpload';
+// import { UploadImage } from '../../middleware/imagekitUpload';
 import UserHelper from '../users/helper'
 import  TokenHandler  from '../../middleware/jwt';
 class Controller {
