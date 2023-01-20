@@ -39,7 +39,7 @@ class Controller {
                   case ['zip', 'rar'].includes(ext):
                     type= "zip"
                     break;
-                  case ['doc','doxc','txt'].includes(ext):
+                  case ['doc','docx','doxc', 'dotx', 'xml','txt'].includes(ext):
                     type= "text"
                     break;
                   default:
